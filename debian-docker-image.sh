@@ -23,7 +23,7 @@ elif [ $# -eq 3 ] && [ "$1" = "-"  ]; then
 
     elif [ "$2" = "clean" ]; then
         $0 - autoclean -
-        dpkg --purge --force-remove-essential sysvinit initscripts e2fsprogs e2fslibs mount util-linux dhcp3-client dhcp3-common sysvinit-utils wget
+        dpkg --purge --force-remove-essential sysvinit initscripts e2fsprogs e2fslibs mount util-linux sysvinit-utils
         rm /var/cache/apt/*.bin
         rm -rf /var/lib/apt/lists/archive.debian.org_*
         apt-get clean
