@@ -1,32 +1,44 @@
 #!/bin/sh
 
 
-if [ $# -eq 2 ]
-  then
-    docker run --privileged --rm -v `pwd`:/mnt debian:8 /mnt/$0 - build $1 | docker import - $2
+
+if [ $# -eq 2 ]; then
+    if [ "$VERBOSE" = "true" ]; then
+        export DBG="/dev/stderr"
+    else
+        export DBG="/dev/null"
+    fi
+
+    docker run --privileged --rm -v `pwd`:/mnt debian:8 /bin/sh -c "DBG=$DBG /mnt/$0  - build $1" | docker import - $2 && echo "Image ready"
+
 elif [ $# -eq 3 ] && [ "$1" = "-"  ]; then
     export DEBIAN_FRONTEND=noninteractive
     export TERM=linux
         
     if [ $2 = "build" ]; then
-        1>&2 $0 - prepare $3 &&\
-        tar -C target -c .
+        1>&2 $0 - prepare $3 
 
+        1>/dev/stderr echo "Sending image to Docker"
+        tar -C target -c .
+        
     elif [ "$2" = "prepare" ]; then
-        apt-get update && apt-get install -y debootstrap &&\
-        debootstrap --keyring=/usr/share/keyrings/debian-archive-removed-keys.gpg $3 target http://archive.debian.org/debian &&\
+        echo "Preparing Debootstrap environmnent"
+        1>$DBG 2>$DBG sh -c "apt-get update && apt-get install -y debootstrap"
+        
+        echo "Building Debian $3 with Debootstrap"
+        1>$DBG 2>$DBG debootstrap --keyring=/usr/share/keyrings/debian-archive-removed-keys.gpg $3 target http://archive.debian.org/debian
         cp -a $0 target/debian-docker-image.sh &&\
-        chroot target /bin/sh -c "apt-get update &&\
-        apt-get upgrade &&\
+
+        echo "Shrinking image"
+        1>$DBG 2>$DBG chroot target /bin/sh -c "
         /debian-docker-image.sh - clean $3" &&\
         rm target/debian-docker-image.sh
 
     elif [ "$2" = "clean" ]; then
         $0 - autoclean -
         dpkg --purge --force-remove-essential sysvinit initscripts e2fsprogs e2fslibs mount util-linux sysvinit-utils
-        rm /var/cache/apt/*.bin
-        rm -rf /var/lib/apt/lists/archive.debian.org_*
         apt-get clean
+        rm -rf /var/lib/apt/lists/archive.debian.org_*
 
     elif [ "$2" = "autoclean" ]; then
         1>/dev/null 2>/dev/null $0 - autoclean-recu -
