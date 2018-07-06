@@ -20,30 +20,35 @@ My script has mainly two advantages:
 ### Implementation
 
 Sadely building Debian images directly with a Dockerfile using debootstrap isn't possible. Docker build cannot be done in *privileged mode* [[1]](https://unix.stackexchange.com/questions/305430/build-docker-image-in-privileged-mode).
-Due to that this repo doesn't contain any `Dockerfile`, but a simple shell script named `debian-docker-image.sh`.
+Due to that this repo doesn't contain any `Dockerfile`, but a simple shell script named `debian-legacy-docker.sh`.
 
 This script might be run on any machine that has an *sh-compatible* shell and Docker installed.
-
 
 ## Pull an image
 
 To get *Debian Etch*:
 
-    docker pull feverch/debian:4
+    docker pull feverch/debian-legacy:4
 
 To get *Debian Lenny*:
 
-    docker pull feverch/debian:5
+    docker pull feverch/debian-legacy:5
 
 ## Build an image
 
 To build a *Debian Etch* image:
 
-    ./debian-docker-image.sh etch feverch/debian:4
+    ./debian-legacy-docker.sh etch feverch/debian-legacy:4
 
 To build a *Debian Lenny* image:
 
-    ./debian-docker-image.sh lenny feverch/debian:5
+    ./debian-legacy-docker.sh lenny feverch/debian-legacy:5
+
+An environment variable named `VERBOSE` can be set to `true` to have an higher verbosity and see a detailled output of the image building process.
+
+To build a *Debian Etch* image with full logs:
+
+    VERBOSE=true ./debian-legacy-docker.sh etch feverch/debian-legacy:4
 
 ## Improvements
 

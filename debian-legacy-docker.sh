@@ -18,7 +18,7 @@ elif [ $# -eq 3 ] && [ "$1" = "-"  ]; then
     if [ $2 = "build" ]; then
         1>&2 $0 - prepare $3 
 
-        1>/dev/stderr echo "Sending image to Docker"
+        1>/dev/stderr echo "Converting system tree into docker image"
         tar -C target -c .
         
     elif [ "$2" = "prepare" ]; then
@@ -27,12 +27,12 @@ elif [ $# -eq 3 ] && [ "$1" = "-"  ]; then
         
         echo "Building Debian $3 with Debootstrap"
         1>$DBG 2>$DBG debootstrap --keyring=/usr/share/keyrings/debian-archive-removed-keys.gpg $3 target http://archive.debian.org/debian
-        cp -a $0 target/debian-docker-image.sh &&\
+        cp -a $0 target/debian-legacy-docker.sh &&\
 
         echo "Shrinking image"
         1>$DBG 2>$DBG chroot target /bin/sh -c "
-        /debian-docker-image.sh - clean $3" &&\
-        rm target/debian-docker-image.sh
+        /debian-legacy-docker.sh - clean $3" &&\
+        rm target/debian-legacy-docker.sh
 
     elif [ "$2" = "clean" ]; then
         $0 - autoclean -
@@ -56,8 +56,8 @@ elif [ $# -eq 3 ] && [ "$1" = "-"  ]; then
     fi
 else
     echo
-    echo "Syntax: ./debian-docker-image.sh DIST REPO"
+    echo "Syntax: ./debian-legacy-docker.sh DIST REPO"
     echo
-    echo "i.e. : ./debian-docker-image.sh etch rbarazzutti/debian:4"
+    echo "i.e. : ./debian-legacy-docker.sh etch rbarazzutti/debian-legacy:4"
     echo
 fi
